@@ -27,7 +27,6 @@ router.post('/', (req, res) => {
             res.redirect(`authors`)
         }
     })
-    res.send(req.body.name)
 })
 
 module.exports = router

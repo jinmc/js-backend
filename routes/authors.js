@@ -23,7 +23,7 @@ router.post('/', (req, res) => {
                 author: author,
                 errorMessage: 'Error creating Author'
             })
-        } else {
+        } else { // success
             res.redirect(`authors`)
         }
     })

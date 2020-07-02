@@ -24,8 +24,13 @@ router.get('/new', async (req, res) => {
 
 // Create Author Route
 router.post('/', async (req, res) => {
-    res.send('Create Book')
-
+    const book = new Book({
+        title: req.body.title,
+        author: req.body.author,
+        publishDate: newDate(req.body.publishDate),
+        pageCount: req.body.pageCount,
+        description: req.body.description,
+    })
 })
 
 module.exports = router

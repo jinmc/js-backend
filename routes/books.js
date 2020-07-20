@@ -47,25 +47,63 @@ router.post('/',  async (req, res) => {
     saveCover(book, req.body.cover)
     try {
         const newBook = await book.save()
-        res.redirect('books')
+        // res.redirect('books')
+        res.redirect(`books/${newBook.id}`)
     } catch {
         renderNewPage(res, book, true)
     }
 })
 
+// Show Book Route
+router.get('/:id', async (req, res) => {
+    try {
+        const book = await Book.findById(req.params.id)
+                                .populate('author')
+                                .exec()
+    } catch {
+        res.redirect('/')
+    }
+})
+
+// Edit book route
+router.get('/:id/edit', async (req, res) => {
+    try {
+        const book = await Book.findById(req.params.id)
+        renderEditPage(res, book)
+    } catch {
+        res.redirect('/')
+    }
+})
+
+// Update Book Route
+router.put('/:id', async (req, res) => {
+    let book
+    try {
+        book = await Book.findById(req.params.id)
+        book.title = req.body.title
+        book.author = req.body.author
+        book.publishdate = new Date(req.body.publishDate)
+        book.pageCount = req.body.pageCount
+        book.description = req.body.description
+        if (req.body.cover != null && req.body.cover != '') {
+            saveCover(book, req.body.cover)
+        }
+    } catch {
+        if (book != null) {
+            renderEditPage(res, book, true)
+        } else {
+            redirect('/')
+        }
+    }
+})
+
+
+async function renderEditPage(res, book, hasError = false) {
+    renderFormPage(res, book, 'edit', hasError)
+}
 
 async function renderNewPage(res, book, hasError = false) {
-    try {
-        const authors = await Author.find({})
-        const params = {
-            authors: authors,
-            book: book
-        }
-        if (hasError) params.errorMessage = 'Error Creating Book'
-        res.render('books/new', params)
-    } catch {
-        res.redirect('books')
-    }
+    renderFormPage(res, book, 'new', hasError)
 }
 
 function saveCover(book, coverEncoded) {
@@ -76,5 +114,27 @@ function saveCover(book, coverEncoded) {
         book.coverImageType = cover.type
     }
 }
+
+async function renderFormPage(res, book, form, hasError = false) {
+    try {
+        const authors = await Author.find({})
+        const params = {
+            authors: authors,
+            book: book
+        }
+        if (hasError) {
+            if (form == 'edit') {
+                params.errorMessage = 'Error Updating Book'
+            } else {
+                params.errorMessage = 'Error creating Book'
+            }
+        }
+        res.render(`books/${form}`, params)
+    } catch {
+        res.redirect('books')
+    }
+}
+
+
 
 module.exports = router

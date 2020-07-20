@@ -60,6 +60,7 @@ router.get('/:id', async (req, res) => {
         const book = await Book.findById(req.params.id)
                                 .populate('author')
                                 .exec()
+        res.render('books/show', { book: book})
     } catch {
         res.redirect('/')
     }
@@ -97,6 +98,23 @@ router.put('/:id', async (req, res) => {
     }
 })
 
+router.delete('/:id', async (req, res) => {
+    let book
+    try {
+        book = await Book.findById(req.params.id)
+        await book.remove()
+        res.redirect('/books')
+    } catch {
+        if (book != null) {
+            res.render('books/show', {
+                book: book,
+                errorMessage: "Could not remove book"
+            })
+        } else {
+            res.redirect('/')
+        }
+    }
+})
 
 async function renderEditPage(res, book, hasError = false) {
     renderFormPage(res, book, 'edit', hasError)
